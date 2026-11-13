@@ -1,0 +1,37 @@
+# Kredensial & env
+.env
+.env.backup
+.env.ci
+
+# WordPress kredensial
+wp-config.php
+wp-config-docker.php
+wp-config-sample.php
+
+# File backup / sampah (.bak, .old)
+*.bak
+.htaccess_old
+index.html.bak
+
+# File sisa proses restore (metadata tar)
+PaxHeaders/
+
+# Data backup offline (tidak fungsional)
+tmp_restore/
+wp-content/wpvividbackups/
+wp-content/uploads/
+
+# Log & cache
+wp-content/debug.log
+storage/logs/*.log
+.phpunit.result.cache
+
+# Dependensi
+vendor/
+node_modules/
+
+# Docs internal
+docs/
+docsflowcharts/
+tools/
+.claude/
