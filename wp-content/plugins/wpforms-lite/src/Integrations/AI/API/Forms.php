@@ -54,8 +54,14 @@ class Forms extends API {
 		// Add a Page break field support.
 		$args['pagebreak'] = true;
 
+		// Add the Checkboxes "Other" choice support.
+		$args['supports_checkbox_other'] = wpforms_field_supports_other_choice( [ 'type' => 'checkbox' ] );
+
 		// Add prompt debug info support.
 		$args['debug'] = defined( 'WPFORMS_AI_DEBUG' ) && WPFORMS_AI_DEBUG;
+
+		// Add global settings (captcha, geolocation) to the request arguments.
+		$args['global_settings'] = $this->get_global_settings();
 
 		$response = $this->request->post( self::ENDPOINT, $args );
 
@@ -77,11 +83,12 @@ class Forms extends API {
      *
      * @return array
      */
-    private function get_available_addons(): array { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+    private function get_available_addons(): array {
 
 		// Since starting from 1.9.4, we display unavailable addon fields in Lite and all Pro licenses,
 	    // we need to return all required addons to let AI generate addon fields.
-	    return FormsAjax::FORM_GENERATOR_REQUIRED_ADDONS;
+	    // Active payment gateways without a field are added so the AI can point to the Payments panel.
+	    return array_merge( FormsAjax::FORM_GENERATOR_REQUIRED_ADDONS, Helpers::get_active_gateway_addons() );
     }
 
 	/**
@@ -205,7 +212,7 @@ class Forms extends API {
 	 *
 	 * @return array
 	 */
-	private function fix_field_cl( array $field, array $form_data ): array { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+	private function fix_field_cl( array $field, array $form_data ): array {
 
 		if ( empty( $field['conditionals'] ) || empty( $field['conditional_logic'] ) ) {
 			return $field;
@@ -346,7 +353,7 @@ class Forms extends API {
 	 *
 	 * @return array
 	 */
-	private function fix_page_breaks( array $form_data, array $page_breaks ): array { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
+	private function fix_page_breaks( array $form_data, array $page_breaks ): array { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		reset( $form_data['fields'] );
 

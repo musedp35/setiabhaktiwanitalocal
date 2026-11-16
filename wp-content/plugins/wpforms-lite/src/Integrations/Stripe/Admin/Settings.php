@@ -53,6 +53,7 @@ class Settings {
 
 		add_action( 'wpforms_settings_init', [ $this, 'connection_is_missing_notice' ] );
 		add_action( 'wpforms_settings_init', [ $this, 'not_supported_currency_notice' ] );
+		add_action( 'wpforms_settings_init', [ $this, 'onboarding_incomplete_notice' ] );
 		add_action( 'wpforms_settings_enqueue', [ $this, 'enqueue_assets' ] );
 		add_filter( 'wpforms_settings_defaults', [ $this, 'register_settings_fields' ], 6 );
 	}
@@ -118,6 +119,41 @@ class Settings {
 					]
 				),
 				esc_html( wpforms_get_currency() )
+			)
+		);
+	}
+
+	/**
+	 * Live Stripe account has not finished onboarding notice.
+	 *
+	 * @since 2.0.4
+	 */
+	public function onboarding_incomplete_notice() {
+
+		// Test mode takes test charges before onboarding is finished.
+		if ( Helpers::get_stripe_mode() !== 'live' ) {
+			return;
+		}
+
+		$account = $this->connect->get_connected_account();
+
+		if ( empty( $account->id ) || ! empty( $account->details_submitted ) ) {
+			return;
+		}
+
+		Notice::warning(
+			sprintf(
+				wp_kses( /* translators: %s - Stripe dashboard URL. */
+					__( 'Your Stripe account setup isn\'t finished. Please complete it in your <a href="%s" target="_blank" rel="noopener noreferrer">Stripe dashboard</a>.', 'wpforms-lite' ),
+					[
+						'a' => [
+							'href'   => [],
+							'target' => [],
+							'rel'    => [],
+						],
+					]
+				),
+				esc_url( 'https://dashboard.stripe.com/' )
 			)
 		);
 	}
@@ -332,11 +368,13 @@ class Settings {
 	 *
 	 * @return string
 	 */
-	private function get_connected_status_content( $mode = '' ) {
+	private function get_connected_status_content( string $mode = '' ): string {
 
-		$output           = '';
-		$account_name     = $this->connect->get_connected_account_name( $mode );
-		$connect_url      = $this->connect->get_connect_with_stripe_url( $mode );
+		$output         = '';
+		$account_name   = $this->connect->get_connected_account_name( $mode );
+		$connect_url    = $this->connect->get_connect_with_stripe_url( $mode );
+		$disconnect_url = $this->connect->get_disconnect_stripe_url( $mode );
+
 		$connected_status = sprintf(
 			wp_kses( /* translators: %1$s - Stripe account name connected, %2$s - Stripe mode connected (live or test). */
 				__( 'Connected to Stripe as <em>%1$s</em> in <strong>%2$s Mode</strong>.', 'wpforms-lite' ),
@@ -350,17 +388,30 @@ class Settings {
 		);
 
 		$output .= sprintf( '<div class="wpforms-connected"><p>%s</p></div>', $connected_status );
-
 		$output .= '<p>' . sprintf(
 			wp_kses( /* translators: %s - Stripe connect URL. */
-				__( '<a href="%s">Switch Accounts</a>', 'wpforms-lite' ),
+				__( '<a href="%s" class="wpforms-btn wpforms-btn-md wpforms-btn-light-grey wpforms-stripe-switch-accounts-btn">Switch Accounts</a>', 'wpforms-lite' ),
 				[
 					'a' => [
-						'href' => [],
+						'href'  => [],
+						'class' => [],
+						'style' => [],
 					],
 				]
 			),
 			esc_url( $connect_url )
+		);
+		$output .= sprintf(
+			wp_kses( /* translators: %s - Stripe disconnect URL. */
+				__( '<a href="%s" class="wpforms-btn wpforms-btn-md wpforms-btn-light-grey">Disconnect</a>', 'wpforms-lite' ),
+				[
+					'a' => [
+						'href'  => [],
+						'class' => [],
+					],
+				]
+			),
+			esc_url( $disconnect_url )
 		) . '</p>';
 
 		return $output;

@@ -129,7 +129,7 @@ class Settings {
 	public function builder_output() {
 		?>
 		<div class="wpforms-panel-content-section wpforms-panel-content-section-<?php echo esc_attr( $this->slug ); ?>"
-			id="<?php echo esc_attr( $this->slug ); ?>-provider" data-provider="<?php echo esc_attr( $this->slug ); ?>">
+			id="<?php echo esc_attr( $this->slug ); ?>-provider" data-provider="<?php echo esc_attr( $this->slug ); ?>" data-provider-name="<?php echo esc_attr( $this->name ); ?>">
 
 			<div class="wpforms-panel-content-section-title">
 				<?php echo esc_html( $this->name ); ?>
@@ -165,6 +165,10 @@ class Settings {
 	 * @return bool
 	 */
 	private function is_payments_enabled(): bool {
+
+		if ( ! Helpers::has_stripe_keys() ) {
+			return false;
+		}
 
 		return ! empty( $this->form_data['payments'][ $this->slug ]['enable'] ) ||
 			! empty( $this->form_data['payments'][ $this->slug ]['enable_one_time'] ) ||
