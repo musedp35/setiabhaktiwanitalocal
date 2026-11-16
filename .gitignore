@@ -19,7 +19,6 @@ PaxHeaders/
 # Data backup offline (tidak fungsional)
 tmp_restore/
 wp-content/wpvividbackups/
-wp-content/uploads/
 
 # Log & cache
 wp-content/debug.log

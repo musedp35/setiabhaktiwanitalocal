@@ -1,0 +1,530 @@
+/* ============================================================
+   Tokoku SBW — Page CSS
+   Plugin: tokoku-sbw
+   Hanya di-enqueue di page "tokoku-sbw"
+   ============================================================ */
+
+/* ── OVERRIDES THEME NEWSUP (scope .tkb-page) ─────────────── */
+.tkb-page .index-banner          { display: none !important; }
+.tkb-page .mg-card-box          { padding: 0 !important; border: none !important; box-shadow: none !important; background: transparent !important; }
+.tkb-page .mg-card-box.padding-20 { padding: 0 !important; }
+.tkb-page .container           { max-width: 100% !important; }
+
+/* ── GLOBAL ───────────────────────────────────────────────── */
+.tkb-content {
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* ── 1. HERO ─────────────────────────────────────────────── */
+
+.tkb-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 80px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 500px;
+}
+
+.tkb-hero-left {
+    flex: 1;
+    max-width: 480px;
+}
+
+.tkb-hero h1 {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 3rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+
+.tkb-hero-logo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+}
+
+.tkb-hero-desc {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.tkb-hero-btns {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.tkb-hero-btns .btn-download {
+    display: inline-block;
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #9460ff, #6b21a8);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(148, 96, 255, 0.35);
+}
+
+.tkb-hero-btns .btn-download:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(148, 96, 255, 0.5);
+}
+
+.tkb-hero-btns .btn-features {
+    display: inline-block;
+    padding: 12px 32px;
+    border: 2px solid #9460ff;
+    color: #9460ff;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+}
+
+.tkb-hero-btns .btn-features:hover {
+    background: #9460ff;
+    color: #fff;
+}
+
+.tkb-hero-right {
+    position: relative;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tkb-illu-main {
+    width: 100%;
+    max-width: 380px;
+}
+
+.tkb-float {
+    position: absolute;
+}
+
+.tkb-float-notif {
+    top: 38%;
+    right: 320px;
+    width: 120px;
+    animation: tkb-float-anim 3s ease-in-out infinite;
+}
+
+@keyframes tkb-float-anim {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-12px); }
+}
+
+/* ── 2. SERVICE / FUNGSI ──────────────────────────────────── */
+
+.tkb-service {
+    padding: 60px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.tkb-service-head h2,
+.tkb-testi-head h2,
+.tkb-about-right h2,
+.tkb-faq-left h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+}
+
+.tkb-service-head h2 span,
+.tkb-testi-head h2 span,
+.tkb-about-right h2 span {
+    color: #9460ff;
+}
+
+.tkb-service-head p,
+.tkb-testi-head p {
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 40px;
+}
+
+.tkb-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-top: 40px;
+}
+
+.tkb-card {
+    background: #f9f7ff;
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    transition: transform 0.25s, box-shadow 0.25s;
+    box-shadow: 0 2px 12px rgba(148, 96, 255, 0.08);
+}
+
+.tkb-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(148, 96, 255, 0.18);
+}
+
+.tkb-card img {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    margin-bottom: 16px;
+}
+
+.tkb-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+}
+
+.tkb-card p {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* ── 3. TESTIMONI ─────────────────────────────────────────── */
+
+.tkb-testi {
+    padding: 60px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.tkb-testi-head h2 span {
+    color: #9460ff;
+}
+
+.tkb-swiper-wrap {
+    position: relative;
+    margin-top: 40px;
+}
+
+.tkb-swiper {
+    padding: 20px 56px 50px 56px;
+}
+
+.tkb-swiper .swiper-slide {
+    width: 320px;
+}
+
+.tkb-testi-card {
+    border-radius: 16px;
+    padding: 28px 24px;
+    color: #fff;
+    text-align: left;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tkb-stars svg {
+    width: 40px;
+    fill: #ffd700;
+}
+
+.tkb-testi-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    flex: 1;
+}
+
+.tkb-testi-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tkb-testi-author img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.5);
+}
+
+.tkb-author-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.tkb-swiper .swiper-button-prev,
+.tkb-swiper .swiper-button-next {
+    color: #9460ff;
+    background: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.tkb-swiper .swiper-button-prev::after,
+.tkb-swiper .swiper-button-next::after {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.tkb-swiper .swiper-pagination-bullet {
+    background: #9460ff;
+    opacity: 0.4;
+}
+
+.tkb-swiper .swiper-pagination-bullet-active {
+    opacity: 1;
+}
+
+/* ── 4. TENTANG / ABOUT ───────────────────────────────────── */
+
+.tkb-about {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    padding: 60px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tkb-about-left {
+    position: relative;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.tkb-about-illu {
+    width: 100%;
+    max-width: 420px;
+}
+
+.tkb-float-app {
+    position: absolute;
+    bottom: -10px;
+    right: 20%;
+    width: 200px;
+    animation: tkb-float-anim 3s ease-in-out infinite;
+}
+
+.tkb-about-right {
+    flex: 1;
+}
+
+.tkb-about-right h2 span {
+    color: #9460ff;
+}
+
+.tkb-about-desc {
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 40px;
+}
+
+.tkb-funfacts {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+}
+
+.tkb-funfact {
+    text-align: center;
+}
+
+.tkb-number {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #9460ff;
+    margin-bottom: 4px;
+}
+
+.tkb-funfact-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── 5. FAQ ────────────────���──────────────────────────────── */
+
+.tkb-faq {
+    display: flex;
+    gap: 60px;
+    padding: 60px 40px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tkb-faq-left {
+    flex: 1;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tkb-faq-left h2 {
+    margin-bottom: 12px;
+}
+
+.tkb-faq-desc {
+    color: #555;
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.tkb-faq-divider {
+    width: 60px;
+    height: 4px;
+    background: #9460ff;
+    border-radius: 2px;
+}
+
+.tkb-faq-right {
+    flex: 2;
+}
+
+.tkb-accordion details {
+    border: 1px solid #e8e0ff;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    background: #faf8ff;
+    overflow: hidden;
+}
+
+.tkb-accordion summary {
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1a1a2e;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.tkb-accordion summary:hover {
+    background: #f0eaff;
+}
+
+.tkb-accordion summary::-webkit-details-marker {
+    display: none;
+}
+
+.tkb-accordion summary::after {
+    content: '+';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.4rem;
+    color: #9460ff;
+    transition: transform 0.2s;
+}
+
+.tkb-accordion details[open] summary::after {
+    content: '\2212';
+}
+
+.tkb-acc-body {
+    padding: 0 20px 16px;
+}
+
+.tkb-acc-body p {
+    color: #555;
+    font-size: 0.92rem;
+    line-height: 1.7;
+}
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+
+@media (max-width: 992px) {
+    .tkb-hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 24px;
+    }
+    .tkb-hero h1 {
+        flex-direction: column;
+        font-size: 1.8rem;
+    }
+    .tkb-hero-logo {
+        width: 56px;
+        height: 56px;
+    }
+    .tkb-hero-btns {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .tkb-hero-right {
+        order: -1;
+    }
+    .tkb-illu-main {
+        max-width: 300px;
+    }
+    .tkb-cards {
+        grid-template-columns: 1fr;
+    }
+    .tkb-about,
+    .tkb-faq {
+        flex-direction: column;
+        gap: 32px;
+        padding: 40px 24px;
+    }
+    .tkb-faq-left {
+        max-width: 100%;
+        text-align: center;
+        align-items: center;
+    }
+    .tkb-faq-divider {
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .tkb-hero {
+        padding: 32px 16px;
+    }
+    .tkb-hero h1 {
+        font-size: 1.4rem;
+    }
+    .tkb-hero-btns .btn-download,
+    .tkb-hero-btns .btn-contact {
+        padding: 10px 24px;
+        font-size: 0.9rem;
+    }
+    .tkb-service,
+    .tkb-testi {
+        padding: 40px 16px;
+    }
+    .tkb-funfacts {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .tkb-swiper {
+        padding: 10px 48px 44px 48px;
+    }
+    .tkb-swiper .swiper-slide {
+        width: 280px;
+    }
+}
