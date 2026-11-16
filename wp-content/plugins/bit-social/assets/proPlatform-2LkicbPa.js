@@ -1,1 +1,0 @@
-globalThis.jotaiAtomCache=globalThis.jotaiAtomCache||{cache:new Map,get(e,t){return this.cache.has(e)?this.cache.get(e):(this.cache.set(e,t),t)}};const a=new Set(["all","facebook","linkedin"]),o=e=>!a.has(e);export{o as i};
