@@ -24,6 +24,8 @@ use WPForms\Vendor\Stripe\CountrySpec;
  */
 class PaymentIntents extends Common implements ApiInterface {
 
+	use Traits\TrialSubscription;
+
 	/**
 	 * Stripe PaymentMethod id received from Elements.
 	 *
@@ -43,11 +45,21 @@ class PaymentIntents extends Common implements ApiInterface {
 	protected $payment_intent_id;
 
 	/**
-	 * Stripe PaymentIntent object.
+	 * Stripe SetupIntent id received from Elements on the confirmation pass of a trial signup.
+	 *
+	 * @since 2.0.4
+	 *
+	 * @var string
+	 */
+	protected $setup_intent_id;
+
+	/**
+	 * Stripe PaymentIntent object, or the SetupIntent of a trial signup, which charges nothing.
 	 *
 	 * @since 1.8.2
+	 * @since 2.0.4 May hold a SetupIntent.
 	 *
-	 * @var PaymentIntent
+	 * @var PaymentIntent|SetupIntent
 	 */
 	protected $intent;
 
@@ -109,8 +121,24 @@ class PaymentIntents extends Common implements ApiInterface {
 	 */
 	public function set_config() {
 
+		/**
+		 * Filter whether to enable the Stripe Radar Session for behavioral fraud signals.
+		 *
+		 * When true, the frontend calls `stripe.createRadarSession()` on the form load and
+		 * passes the session id to `createPaymentMethod()`/`confirmPayment()`. This
+		 * enriches Stripe Radar with mouse, keyboard, and dwell telemetry and compounds
+		 * with the server-side risk gate.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param bool $enabled Whether the Radar Session API is active.
+		 */
+		$radar_session_enabled = (bool) apply_filters( 'wpforms_stripe_radar_session_enabled', true ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
 		$localize_script = [
-			'element_locale' => $this->filter_config_element_locale(),
+			'element_locale'        => $this->filter_config_element_locale(),
+			'radar_session_enabled' => $radar_session_enabled,
+			'currency_minimum'      => Helpers::get_currency_minimum( wpforms_get_currency() ),
 		];
 
 		$this->config = [
@@ -184,7 +212,8 @@ class PaymentIntents extends Common implements ApiInterface {
 
 		$min = wpforms_get_min_suffix();
 
-		$this->config['local_js_url'] = WPFORMS_PLUGIN_URL . "assets/js/integrations/stripe/wpforms-stripe-elements{$min}.js";
+		$this->config['local_js_url']  = WPFORMS_PLUGIN_URL . "assets/js/integrations/stripe/wpforms-stripe-elements{$min}.js";
+		$this->config['local_css_url'] = WPFORMS_PLUGIN_URL . "assets/css/integrations/stripe/wpforms-stripe{$min}.css";
 	}
 
 	/**
@@ -230,7 +259,11 @@ class PaymentIntents extends Common implements ApiInterface {
 	 */
 	public function set_payment_tokens( $entry ) {
 
-		if ( ! empty( $entry['payment_method_id'] ) && empty( $entry['payment_intent_id'] ) ) {
+		if ( ! empty( $entry['setup_intent_id'] ) && is_string( $entry['setup_intent_id'] ) ) {
+			$this->setup_intent_id = $entry['setup_intent_id'];
+		}
+
+		if ( ! empty( $entry['payment_method_id'] ) && empty( $entry['payment_intent_id'] ) && empty( $entry['setup_intent_id'] ) ) {
 			$this->payment_method_id = $entry['payment_method_id'];
 		}
 
@@ -238,7 +271,7 @@ class PaymentIntents extends Common implements ApiInterface {
 			$this->payment_intent_id = $entry['payment_intent_id'];
 		}
 
-		if ( empty( $this->payment_method_id ) && empty( $this->payment_intent_id ) ) {
+		if ( empty( $this->payment_method_id ) && empty( $this->payment_intent_id ) && empty( $this->setup_intent_id ) ) {
 			$this->error = esc_html__( 'Stripe payment stopped, missing both PaymentMethod and PaymentIntent ids.', 'wpforms-lite' );
 		}
 	}
@@ -289,6 +322,10 @@ class PaymentIntents extends Common implements ApiInterface {
 	 * @throws ApiErrorException If the request fails.
 	 */
 	public function process_single( $args ) {
+
+		if ( $this->reject_setup_intent() ) {
+			return;
+		}
 
 		if ( $this->payment_method_id ) {
 
@@ -456,13 +493,13 @@ class PaymentIntents extends Common implements ApiInterface {
 
 		try {
 
-			if ( isset( $args['customer_email'] ) || isset( $args['customer_name'] ) ) {
-				$this->set_customer( $args['customer_email'] ?? '', $args['customer_name'] ?? '', $args['customer_address'] ?? [] );
+			if ( isset( $args['customer_email'] ) || isset( $args['customer_name'] ) || isset( $args['customer_phone'] ) ) {
+				$this->set_customer( $args['customer_email'] ?? '', $args['customer_name'] ?? '', $args['customer_address'] ?? [], $args['customer_phone'] ?? '', $args['customer_metadata'] ?? [] );
 
 				$args['customer'] = $this->get_customer( 'id' );
 			}
 
-			unset( $args['customer_email'], $args['customer_name'], $args['customer_address'] );
+			unset( $args['customer_email'], $args['customer_name'], $args['customer_address'], $args['customer_phone'], $args['customer_metadata'] );
 
 			$this->intent = PaymentIntent::create( $args, Helpers::get_auth_opts() );
 
@@ -476,7 +513,7 @@ class PaymentIntents extends Common implements ApiInterface {
 				return;
 			}
 
-			$this->set_bypass_captcha_3dsecure_token();
+			$this->set_bypass_captcha_3dsecure_token( $args );
 
 			if ( $this->intent->status === 'requires_confirmation' ) {
 				$this->request_confirm_payment_ajax( $this->intent );
@@ -524,6 +561,17 @@ class PaymentIntents extends Common implements ApiInterface {
 	 */
 	public function process_subscription( $args ) {
 
+		// A trial collects the card without charging it, so it runs on a SetupIntent instead.
+		if ( ! empty( $args['trial'] ) ) {
+			$this->process_trial_subscription( $args );
+
+			return;
+		}
+
+		if ( $this->reject_setup_intent() ) {
+			return;
+		}
+
 		if ( $this->payment_method_id ) {
 
 			// Normal flow.
@@ -543,7 +591,7 @@ class PaymentIntents extends Common implements ApiInterface {
 	 *
 	 * @param array $args Subscription payment arguments.
 	 */
-	protected function charge_subscription( $args ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
+	protected function charge_subscription( $args ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		if ( empty( $this->payment_method_id ) ) {
 			$this->error = esc_html__( 'Stripe subscription stopped, missing PaymentMethod id.', 'wpforms-lite' );
@@ -560,6 +608,7 @@ class PaymentIntents extends Common implements ApiInterface {
 			'metadata' => [
 				'form_name' => $args['form_title'],
 				'form_id'   => $args['form_id'],
+				'cycles'    => $args['cycles'] ?? null,
 			],
 			'expand'   => [ 'latest_invoice.payment_intent' ],
 		];
@@ -573,7 +622,7 @@ class PaymentIntents extends Common implements ApiInterface {
 		}
 
 		try {
-			$this->set_customer( $args['email'], $args['customer_name'] ?? '', $args['customer_address'] ?? [] );
+			$this->set_customer( $args['email'], $args['customer_name'] ?? '', $args['customer_address'] ?? [], $args['customer_phone'] ?? '', $args['customer_metadata'] ?? [] );
 
 			$sub_args['customer']         = $this->get_customer( 'id' );
 			$sub_args['payment_behavior'] = 'default_incomplete';
@@ -601,7 +650,7 @@ class PaymentIntents extends Common implements ApiInterface {
 				return;
 			}
 
-			$this->set_bypass_captcha_3dsecure_token();
+			$this->set_bypass_captcha_3dsecure_token( $args );
 
 			if ( in_array( $this->intent->status , [ 'requires_confirmation', 'requires_payment_method' ], true ) ) {
 				$this->request_confirm_payment_ajax( $this->intent );
@@ -662,11 +711,11 @@ class PaymentIntents extends Common implements ApiInterface {
 	 *
 	 * @return array
 	 */
-	public function get_charge_details( $keys ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+	public function get_charge_details( $keys ) {
 
-		$charge = isset( $this->intent->charges->data[0] ) ? $this->intent->charges->data[0] : null;
+		$source = $this->get_payment_method_details_source();
 
-		if ( empty( $charge ) || empty( $keys ) ) {
+		if ( empty( $source ) || empty( $keys ) ) {
 			return [];
 		}
 
@@ -677,24 +726,59 @@ class PaymentIntents extends Common implements ApiInterface {
 		$result = [];
 
 		foreach ( $keys as $key ) {
-			if ( isset( $charge->payment_method_details->card, $charge->payment_method_details->card->{$key} ) ) {
-				$result[ $key ] = sanitize_text_field( $charge->payment_method_details->card->{$key} );
+			if ( isset( $source['details']->card, $source['details']->card->{$key} ) ) {
+				$result[ $key ] = sanitize_text_field( $source['details']->card->{$key} );
 
 				continue;
 			}
 
-			if ( isset( $charge->payment_method_details->{$key} ) ) {
-				$result[ $key ] = sanitize_text_field( $charge->payment_method_details->{$key} );
+			if ( isset( $source['details']->{$key} ) ) {
+				$result[ $key ] = sanitize_text_field( $source['details']->{$key} );
 
 				continue;
 			}
 
-			if ( isset( $charge->billing_details->{$key} ) ) {
-				$result[ $key ] = sanitize_text_field( $charge->billing_details->{$key} );
+			if ( isset( $source['billing']->{$key} ) ) {
+				$result[ $key ] = sanitize_text_field( $source['billing']->{$key} );
 			}
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Get where the card details live: the charge of a PaymentIntent, or the saved payment method of a
+	 * SetupIntent, which has no charge.
+	 *
+	 * @since 2.0.4
+	 *
+	 * @return array Empty, or `details` (type and card) plus `billing` (name and email) objects.
+	 */
+	private function get_payment_method_details_source(): array {
+
+		if ( isset( $this->intent->object ) && $this->intent->object === 'setup_intent' ) {
+			$payment_method = $this->intent->payment_method ?? null;
+
+			if ( ! is_object( $payment_method ) ) {
+				return [];
+			}
+
+			return [
+				'details' => $payment_method,
+				'billing' => $payment_method->billing_details ?? null,
+			];
+		}
+
+		$charge = $this->intent->charges->data[0] ?? null;
+
+		if ( empty( $charge ) ) {
+			return [];
+		}
+
+		return [
+			'details' => $charge->payment_method_details ?? null,
+			'billing' => $charge->billing_details ?? null,
+		];
 	}
 
 	/**
@@ -706,11 +790,7 @@ class PaymentIntents extends Common implements ApiInterface {
 	 */
 	protected function request_3dsecure_ajax( $intent ) {
 
-		if ( ! isset( $intent->status, $intent->next_action->type ) ) {
-			return;
-		}
-
-		if ( $intent->status !== 'requires_action' || $intent->next_action->type !== 'use_stripe_sdk' ) {
+		if ( ! isset( $intent->status ) || $intent->status !== 'requires_action' ) {
 			return;
 		}
 
@@ -745,10 +825,13 @@ class PaymentIntents extends Common implements ApiInterface {
 	 * Set an encrypted token as a PaymentIntent metadata item.
 	 *
 	 * @since 1.8.2
+	 * @since 1.9.6 Added $args parameter.
+	 *
+	 * @param array $args Additional arguments.
 	 *
 	 * @throws ApiErrorException In case payment intent save wasn't successful.
 	 */
-	private function set_bypass_captcha_3dsecure_token() {
+	private function set_bypass_captcha_3dsecure_token( array $args = [] ) {
 
 		$form_data = wpforms()->obj( 'process' )->form_data;
 
@@ -758,6 +841,7 @@ class PaymentIntents extends Common implements ApiInterface {
 		}
 
 		$this->intent->metadata['captcha_3dsecure_token'] = Crypto::encrypt( $this->intent->id );
+		$this->intent->metadata['spam_reason']            = $args['metadata']['spam_reason'] ?? null;
 
 		$this->intent->update( $this->intent->id, $this->intent->serializeParameters(), Helpers::get_auth_opts() );
 	}
@@ -779,18 +863,21 @@ class PaymentIntents extends Common implements ApiInterface {
 
 		// Firstly, run checks that may prevent bypassing:
 		// 1) Sanity check to prevent possible tinkering with captcha on non-payment forms.
-		// 2) Both reCAPTCHA and hCaptcha are enabled by the same setting.
+		// 2) All Captcha providers are enabled by the same setting.
 		if (
 			! Helpers::is_payments_enabled( $form_data ) ||
 			empty( $form_data['settings']['recaptcha'] ) ||
-			empty( $entry['payment_intent_id'] )
+			( empty( $entry['payment_intent_id'] ) && ( empty( $entry['setup_intent_id'] ) || ! is_string( $entry['setup_intent_id'] ) ) )
 		) {
 			return $is_bypassed;
 		}
 
 		// This is executed before payment processing kicks in and fills `$this->intent`.
-		// PaymentIntent intent has to be retrieved from Stripe instead of getting it from `$this->intent`.
-		$intent = $this->retrieve_payment_intent( $entry['payment_intent_id'] );
+		// The intent has to be retrieved from Stripe instead of getting it from `$this->intent`.
+		// A trial signup confirms a SetupIntent, everything else a PaymentIntent.
+		$intent = ! empty( $entry['setup_intent_id'] ) && is_string( $entry['setup_intent_id'] )
+			? $this->retrieve_setup_intent( $entry['setup_intent_id'] )
+			: $this->retrieve_payment_intent( $entry['payment_intent_id'] );
 
 		if ( empty( $intent->status ) || $intent->status !== 'succeeded' ) {
 			return $is_bypassed;
@@ -806,6 +893,10 @@ class PaymentIntents extends Common implements ApiInterface {
 		$intent->metadata['captcha_3dsecure_token'] = null;
 
 		$intent->update( $intent->id, $intent->serializeParameters(), Helpers::get_auth_opts() );
+
+		if ( isset( $intent->metadata['spam_reason'] ) ) {
+			return $is_bypassed;
+		}
 
 		return true;
 	}

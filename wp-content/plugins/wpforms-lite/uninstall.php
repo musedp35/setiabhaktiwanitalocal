@@ -20,9 +20,15 @@
  */
 
 // Exit if accessed directly.
+use WPForms\Db\Analytics\DB as AnalyticsDB;
 use WPForms\Db\Payments\Meta as PaymentsMeta;
 use WPForms\Db\Payments\Payment;
+use WPForms\Db\ProductEvents\Queue as ProductEventsQueue;
 use WPForms\Logger\Repository;
+use WPForms\Pro\Db\Analytics\DB as ProAnalyticsDB;
+use WPForms\Pro\Db\Dashboard\FormDaily as DashboardFormDaily;
+use WPForms\Pro\Db\Dashboard\LocationDaily as DashboardLocationDaily;
+use WPForms\Pro\Db\Dashboard\PaymentDaily as DashboardPaymentDaily;
 use WPForms\Tasks\Meta as TasksMeta;
 use WPForms\Tasks\Tasks;
 
@@ -78,6 +84,10 @@ $wpdb->query( 'DROP TABLE IF EXISTS ' . TasksMeta::get_table_name() );
 // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 $wpdb->query( 'DROP TABLE IF EXISTS ' . Repository::get_table_name() );
 
+// Delete product events buffer table.
+// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( 'DROP TABLE IF EXISTS ' . ProductEventsQueue::get_table_name() );
+
 // Delete file restrictions table.
 // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'wpforms_file_restrictions' );
@@ -86,17 +96,44 @@ $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'wpforms_file_restrictio
 // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'wpforms_protected_files' );
 
+// Delete analytics tables. The Lite snapshot/forms tables are always present;
+// the Pro field tables are dropped only when the Pro DB class is loadable.
+// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( 'DROP TABLE IF EXISTS ' . AnalyticsDB::snapshots_table() );
+// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( 'DROP TABLE IF EXISTS ' . AnalyticsDB::forms_table() );
+
+if ( class_exists( ProAnalyticsDB::class ) ) {
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	$wpdb->query( 'DROP TABLE IF EXISTS ' . ProAnalyticsDB::snapshot_fields_table() );
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	$wpdb->query( 'DROP TABLE IF EXISTS ' . ProAnalyticsDB::fields_table() );
+}
+
+// Delete the Dashboard rollup tables. Pro-only, so they are dropped only when
+// the Pro DB classes are loadable.
+if ( class_exists( DashboardFormDaily::class ) ) {
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	$wpdb->query( 'DROP TABLE IF EXISTS ' . DashboardFormDaily::get_table_name() );
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	$wpdb->query( 'DROP TABLE IF EXISTS ' . DashboardLocationDaily::get_table_name() );
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	$wpdb->query( 'DROP TABLE IF EXISTS ' . DashboardPaymentDaily::get_table_name() );
+}
+
 /**
  * Delete tables that might be created by "Add-ons".
  *
  * 1. Form Locker.
  * 2. User Journey.
  * 3. Coupons.
+ * 4. Entry Automation.
  */
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'wpforms_form_locker_email_verification' );
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'wpforms_user_journey' );
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'wpforms_coupons' );
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'wpforms_coupons_forms' );
+$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'wpforms_entry_automation_tasks' );
 
 // Delete Preview page.
 $preview_page = get_option( 'wpforms_preview_page', false );
