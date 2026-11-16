@@ -1,0 +1,530 @@
+/* ============================================================
+   Kurir SBW — Page CSS
+   Plugin: kurir-sbw
+   Hanya di-enqueue di page "aplikasi-kurir-sbw"
+   ============================================================ */
+
+/* ── OVERRIDES THEME NEWSUP (scope .ksw-page) ─────────────── */
+.ksw-page .index-banner          { display: none !important; }
+.ksw-page .mg-card-box          { padding: 0 !important; border: none !important; box-shadow: none !important; background: transparent !important; }
+.ksw-page .mg-card-box.padding-20 { padding: 0 !important; }
+.ksw-page .container           { max-width: 100% !important; }
+
+/* ── GLOBAL ───────────────────────────────────────────────── */
+.ksw-content {
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* ── 1. HERO ─────────────────────────────────────────────── */
+
+.ksw-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 80px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 500px;
+}
+
+.ksw-hero-left {
+    flex: 1;
+    max-width: 480px;
+}
+
+.ksw-hero h1 {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 4rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+
+.ksw-hero-logo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+}
+
+.ksw-hero-desc {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.ksw-hero-btns {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.ksw-hero-btns .btn-download {
+    display: inline-block;
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #9460ff, #6b21a8);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(148, 96, 255, 0.35);
+}
+
+.ksw-hero-btns .btn-download:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(148, 96, 255, 0.5);
+}
+
+.ksw-hero-btns .btn-contact {
+    display: inline-block;
+    padding: 12px 32px;
+    border: 2px solid #9460ff;
+    color: #9460ff;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+}
+
+.ksw-hero-btns .btn-contact:hover {
+    background: #9460ff;
+    color: #fff;
+}
+
+.ksw-hero-right {
+    position: relative;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ksw-illu-main {
+    width: 100%;
+    max-width: 380px;
+}
+
+.ksw-float {
+    position: absolute;
+}
+
+.ksw-float-notif {
+    top: 38%;
+    right: 120px;
+    width: 120px;
+    animation: ksw-float-anim 3s ease-in-out infinite;
+}
+
+@keyframes ksw-float-anim {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-12px); }
+}
+
+/* ── 2. SERVICE / FUNGSI ──────────────────────────────────── */
+
+.ksw-service {
+    padding: 60px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.ksw-service-head h2,
+.ksw-testi-head h2,
+.ksw-about-right h2,
+.ksw-faq-left h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+}
+
+.ksw-service-head h2 span,
+.ksw-testi-head h2 span,
+.ksw-about-right h2 span {
+    color: #9460ff;
+}
+
+.ksw-service-head p,
+.ksw-testi-head p {
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 40px;
+}
+
+.ksw-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 40px;
+}
+
+.ksw-card {
+    background: #f9f7ff;
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    transition: transform 0.25s, box-shadow 0.25s;
+    box-shadow: 0 2px 12px rgba(148, 96, 255, 0.08);
+}
+
+.ksw-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(148, 96, 255, 0.18);
+}
+
+.ksw-card img {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    margin-bottom: 16px;
+}
+
+.ksw-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+}
+
+.ksw-card p {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* ── 3. TESTIMONI ─────────────────────────────────────────── */
+
+.ksw-testi {
+    padding: 60px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.ksw-testi-head h2 span {
+    color: #9460ff;
+}
+
+.ksw-swiper-wrap {
+    position: relative;
+    margin-top: 40px;
+}
+
+.ksw-swiper {
+    padding: 20px 56px 50px 56px;
+}
+
+.ksw-swiper .swiper-slide {
+    width: 320px;
+}
+
+.ksw-testi-card {
+    border-radius: 16px;
+    padding: 28px 24px;
+    color: #fff;
+    text-align: left;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ksw-stars svg {
+    width: 40px;
+    fill: #ffd700;
+}
+
+.ksw-testi-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    flex: 1;
+}
+
+.ksw-testi-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ksw-testi-author img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.5);
+}
+
+.ksw-author-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.ksw-swiper .swiper-button-prev,
+.ksw-swiper .swiper-button-next {
+    color: #9460ff;
+    background: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.ksw-swiper .swiper-button-prev::after,
+.ksw-swiper .swiper-button-next::after {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.ksw-swiper .swiper-pagination-bullet {
+    background: #9460ff;
+    opacity: 0.4;
+}
+
+.ksw-swiper .swiper-pagination-bullet-active {
+    opacity: 1;
+}
+
+/* ── 4. TENTANG / ABOUT ───────────────────────────────────── */
+
+.ksw-about {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    padding: 60px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.ksw-about-left {
+    position: relative;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.ksw-about-illu {
+    width: 100%;
+    max-width: 420px;
+}
+
+.ksw-float-app {
+    position: absolute;
+    bottom: -10px;
+    right: 20%;
+    width: 200px;
+    animation: ksw-float-anim 3s ease-in-out infinite;
+}
+
+.ksw-about-right {
+    flex: 1;
+}
+
+.ksw-about-right h2 span {
+    color: #9460ff;
+}
+
+.ksw-about-desc {
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 40px;
+}
+
+.ksw-funfacts {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+}
+
+.ksw-funfact {
+    text-align: center;
+}
+
+.ksw-number {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #9460ff;
+    margin-bottom: 4px;
+}
+
+.ksw-funfact-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── 5. FAQ ────────────────���──────────────────────────────── */
+
+.ksw-faq {
+    display: flex;
+    gap: 60px;
+    padding: 60px 40px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.ksw-faq-left {
+    flex: 1;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.ksw-faq-left h2 {
+    margin-bottom: 12px;
+}
+
+.ksw-faq-desc {
+    color: #555;
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.ksw-faq-divider {
+    width: 60px;
+    height: 4px;
+    background: #9460ff;
+    border-radius: 2px;
+}
+
+.ksw-faq-right {
+    flex: 2;
+}
+
+.ksw-accordion details {
+    border: 1px solid #e8e0ff;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    background: #faf8ff;
+    overflow: hidden;
+}
+
+.ksw-accordion summary {
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1a1a2e;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.ksw-accordion summary:hover {
+    background: #f0eaff;
+}
+
+.ksw-accordion summary::-webkit-details-marker {
+    display: none;
+}
+
+.ksw-accordion summary::after {
+    content: '+';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.4rem;
+    color: #9460ff;
+    transition: transform 0.2s;
+}
+
+.ksw-accordion details[open] summary::after {
+    content: '\2212';
+}
+
+.ksw-acc-body {
+    padding: 0 20px 16px;
+}
+
+.ksw-acc-body p {
+    color: #555;
+    font-size: 0.92rem;
+    line-height: 1.7;
+}
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+
+@media (max-width: 992px) {
+    .ksw-hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 24px;
+    }
+    .ksw-hero h1 {
+        flex-direction: column;
+        font-size: 1.8rem;
+    }
+    .ksw-hero-logo {
+        width: 56px;
+        height: 56px;
+    }
+    .ksw-hero-btns {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .ksw-hero-right {
+        order: -1;
+    }
+    .ksw-illu-main {
+        max-width: 300px;
+    }
+    .ksw-cards {
+        grid-template-columns: 1fr;
+    }
+    .ksw-about,
+    .ksw-faq {
+        flex-direction: column;
+        gap: 32px;
+        padding: 40px 24px;
+    }
+    .ksw-faq-left {
+        max-width: 100%;
+        text-align: center;
+        align-items: center;
+    }
+    .ksw-faq-divider {
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .ksw-hero {
+        padding: 32px 16px;
+    }
+    .ksw-hero h1 {
+        font-size: 1.4rem;
+    }
+    .ksw-hero-btns .btn-download,
+    .ksw-hero-btns .btn-contact {
+        padding: 10px 24px;
+        font-size: 0.9rem;
+    }
+    .ksw-service,
+    .ksw-testi {
+        padding: 40px 16px;
+    }
+    .ksw-funfacts {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .ksw-swiper {
+        padding: 10px 48px 44px 48px;
+    }
+    .ksw-swiper .swiper-slide {
+        width: 280px;
+    }
+}
